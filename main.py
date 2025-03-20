@@ -1,169 +1,102 @@
 import pygame
 import math
 from queue import PriorityQueue
+from algorithms import AStar, Node
+from visualization import draw, make_grid, get_clicked_position
 
 #pygame window
 WIDTH = 800
 HEIGHT = 800
-WINDOW = pygame.display.set_mode((HEIGHT, WIDTH))
+SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("AI Car")
+#window = Window(SCREEN)
 
 #pygame colors
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
+PINK = (255, 192, 203)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 ORANGE = (255, 165, 0)
 GRAY = (128, 128, 128)
 TURQUOISE = (48, 213, 200)
 
-#Class for nodes in graph
-class Node:
-    def __init__(self, row, col, width, total_rows):
-        self.row = row
-        self.col = col
-        self.x = row * width
-        self.y = col * width
-        self.color = WHITE
-        self.neighbors = []
-        self.width = width
-        self.total_rows = total_rows
 
-    #Below are our methods to tell us the state of the node
+class Button:
+    def __init__(self, x, y, width, height, color, text, action):
+        self.rect = pygame.Rect(x, y, width, height)
+        self.color = color
+        self.text = text
+        self.action = action
 
-    #getters
-    def get_position(self):
-        return self.row, self.col #(row, col)
+    def draw(self, SCREEN):
+        pygame.draw.rect(SCREEN, self.color, self.rect)
+        font = pygame.font.Font(None, 30)
+        text_surface = font.render(self.text, True, BLACK)
+        text_rect = text_surface.get_rect(center=self.rect.center)
+        SCREEN.blit(text_surface, text_rect)
 
-    def is_explored(self): #red square
-        return self.color == RED
-
-    def is_open(self):
-        return self.color == GREEN
-
-    def is_barrier(self):
-        return self.color == GRAY
-
-    def is_start(self):
-        return self.color == BLUE
-
-    def is_end(self):
-        return self.color == ORANGE
-
-    def reset(self):
-        self.color == WHITE
-
-    #setters
-    def make_closed(self):
-        self.color = RED
-
-    def make_open(self):
-        self.color = GREEN
-
-    def make_barrier(self):
-        self.color = GRAY
-
-    def make_end(self):
-        self.color = ORANGE
-
-    def make_path(self):
-        self.color = TURQUOISE
-
-    def draw(self, window):
-        pygame.draw.rect(window, self.color, (self.x, self.y, self.width, self.width))
-
-    def update_neighbors(self, grid):
-        pass
-
-    def __lt__(self, other): #lt = 'less than', for comparing two different nodes, will expand later
-        return False
+    def is_clicked(self, pos):
+        return self.rect.collidepoint(pos)
 
 
-def heuristics(point1, point2):
-    x1, y1 = point1
-    x2, y2 = point2
-    return abs(x1 - x2) + abs(y1 - y2)
-
-def make_grid(rows, width):
-    grid = []
-    GAP = width // rows
-    for i in range(rows):
-        grid.append([])
-        for j in range(rows):
-            node = Node(i, j, GAP, rows)
-            grid[i].append(node)
-
-    return grid
-
-def draw_grid(window, rows, width):
-    GAP = width // rows
-    # horizontal lines
-    for i in range(rows):
-        pygame.draw.line(window, BLACK, (0, i * GAP), (width, i * GAP))
-    #vertical lines
-        for j in range(rows):
-            pygame.draw.line(window, BLACK, (j * GAP, 0), (j * GAP, width))
-
-
-def draw(window, grid, rows, width):
-    window.fill(WHITE)
-
-    for row in grid:
-        for node in row:
-            node.draw(window)
-
-    draw_grid(window, rows, width)
-    pygame.display.update()
-
-def get_clicked_position(position, rows, width):
-    GAP = width // rows
-    y, x = position
-
-    row = y // GAP
-    col = x // GAP
-
-    return row, col
-
-
-def main(window, width):
-    ROWS = 10
+def main(SCREEN, width):
+    ROWS = 25
     grid = make_grid(ROWS, width)
 
     start = None
     end = None
 
     running = True
-    started = False
 
     while running:
+        draw(SCREEN, grid, ROWS, width)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
 
-            if started:
-                continue
+            if pygame.mouse.get_pressed()[0]: #Left click, these will just be changed to buttons later
+                pos = pygame.mouse.get_pos()
+                row, col = get_clicked_position(pos, ROWS, width)
+                spot = grid[row][col]
+                if not start and spot != end:
+                    start = spot
+                    start.make_start()
 
-            if pygame.mouse.get_pressed()[0]:
-                pass
+                elif not end and spot != start:
+                    end = spot
+                    end.make_end()
 
+                elif spot != end and spot != start:
+                    spot.make_barrier()
+
+
+            elif pygame.mouse.get_pressed()[2]: #right click
+                pos = pygame.mouse.get_pos()
+                row, col = get_clicked_position(pos, ROWS, width)
+                spot = grid[row][col]
+                spot.reset()
+                if spot == start:
+                    start = None
+                elif spot == end:
+                    end = None
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE and start and end: #start for algorithm
+                    for row in grid:
+                        for node in row:
+                            node.update_neighbors(grid)
+
+                        AStar(lambda: draw(SCREEN, grid, ROWS, width), grid, start, end) #lambda is so we can pass the draw function to the algorithm
+
+                if event.key == pygame.K_c:
+                    start = None
+                    end = None
+                    grid = make_grid(ROWS, width)
 
 
     pygame.quit()
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+main(SCREEN, WIDTH)
