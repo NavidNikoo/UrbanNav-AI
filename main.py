@@ -5,11 +5,12 @@ from algorithms import AStar, Node
 from visualization import draw, make_grid, get_clicked_position
 
 #pygame window
-WIDTH = 800
+WIDTH = 700
 HEIGHT = 800
 SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("AI Car")
-#window = Window(SCREEN)
+pygame.init()
+pygame.font.init()
 
 #pygame colors
 BLACK = (0, 0, 0)
@@ -21,27 +22,33 @@ BLUE = (0, 0, 255)
 ORANGE = (255, 165, 0)
 GRAY = (128, 128, 128)
 TURQUOISE = (48, 213, 200)
+LIGHT_GRAY = (200, 200, 200)
+DARK_GRAY = (160, 160, 160)
 
+BUTTON_WIDTH = 120
+BUTTON_HEIGHT = 50
 
 class Button:
-    def __init__(self, x, y, width, height, color, text, action):
-        self.rect = pygame.Rect(x, y, width, height)
-        self.color = color
+    def __init__(self, x, y, text):
+        self.rect = pygame.Rect(x, y, BUTTON_WIDTH, BUTTON_HEIGHT)
         self.text = text
-        self.action = action
+        self.color = LIGHT_GRAY
+        self.active = False
 
-    def draw(self, SCREEN):
-        pygame.draw.rect(SCREEN, self.color, self.rect)
-        font = pygame.font.Font(None, 30)
+    def draw(self, win):
+        color = DARK_GRAY if self.active else self.color
+        pygame.draw.rect(win, color, self.rect, border_radius=8)
+        font = pygame.font.SysFont('arial', 22, bold=True)
         text_surface = font.render(self.text, True, BLACK)
         text_rect = text_surface.get_rect(center=self.rect.center)
-        SCREEN.blit(text_surface, text_rect)
+        win.blit(text_surface, text_rect)
 
     def is_clicked(self, pos):
         return self.rect.collidepoint(pos)
 
 
 def main(SCREEN, width):
+    mode = None
     ROWS = 25
     grid = make_grid(ROWS, width)
 
@@ -50,11 +57,51 @@ def main(SCREEN, width):
 
     running = True
 
+    button_y = HEIGHT - 80  # Move buttons to the bottom
+    buttons = {
+        'block': Button(10, button_y, "Block"),
+        'open': Button(100, button_y, "Open"),
+        'start': Button(200, button_y, "Start"),
+        'goal': Button(300, button_y, "Goal"),
+        'run': Button(400, button_y, "Run A*"),
+        #'learn': Button(500, HEIGHT-700, "Learning"),
+        'reset': Button(600, button_y, "Reset")
+    }
+
     while running:
+        SCREEN.fill(WHITE)  # Clear screen before redrawing
         draw(SCREEN, grid, ROWS, width)
+
+
+        for key, button in buttons.items():
+            button.active = (mode == key)
+            button.draw(SCREEN)
+
+        pygame.display.update()  # Ensure buttons are displayed
+
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                pos = pygame.mouse.get_pos()
+
+                button_clicked = False
+                for key, button in buttons.items():
+                    if button.is_clicked(pos):
+                        mode = key
+                        button_clicked = True
+
+                        if mode == 'run' and start and end:
+                            AStar(lambda: draw(SCREEN, grid, ROWS, width), grid, start, end)
+                        elif mode == 'reset':
+                            start = None
+                            end = None
+                            grid = make_grid(ROWS, width)
+
+                if button_clicked:
+                    continue
 
             if pygame.mouse.get_pressed()[0]: #Left click, these will just be changed to buttons later
                 pos = pygame.mouse.get_pos()
