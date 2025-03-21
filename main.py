@@ -60,12 +60,12 @@ def main(SCREEN, width):
     button_y = HEIGHT - 80  # Move buttons to the bottom
     buttons = {
         'block': Button(10, button_y, "Block"),
-        'open': Button(100, button_y, "Open"),
-        'start': Button(200, button_y, "Start"),
-        'goal': Button(300, button_y, "Goal"),
-        'run': Button(400, button_y, "Run A*"),
+        'open': Button(150, button_y, "Open"),
+        'start': Button(290, button_y, "Start"),
+        'goal': Button(430, button_y, "Goal"),
+        'run': Button(570, button_y, "Run A*"),
         #'learn': Button(500, HEIGHT-700, "Learning"),
-        'reset': Button(600, button_y, "Reset")
+        'reset': Button(710, button_y, "Reset")
     }
 
     while running:
