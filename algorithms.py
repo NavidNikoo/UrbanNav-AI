@@ -1,7 +1,6 @@
 import pygame
 from queue import PriorityQueue
 
-BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 PINK = (255, 192, 203)
@@ -10,7 +9,6 @@ BLUE = (0, 0, 255)
 ORANGE = (255, 165, 0)
 GRAY = (128, 128, 128)
 TURQUOISE = (48, 213, 200)
-
 
 class Node:
     def __init__(self, row, col, width, total_rows):
@@ -23,13 +21,10 @@ class Node:
         self.width = width
         self.total_rows = total_rows
 
-    #Below are our methods to tell us the state of the node
-
-    #getters
     def get_position(self):
-        return self.row, self.col #(row, col)
+        return self.row, self.col
 
-    def is_explored(self): #red square
+    def is_closed(self):
         return self.color == RED
 
     def is_open(self):
@@ -39,7 +34,7 @@ class Node:
         return self.color == GRAY
 
     def is_start(self):
-        return self.color == BLUE
+        return self.color == PINK
 
     def is_end(self):
         return self.color == ORANGE
@@ -50,7 +45,6 @@ class Node:
     def make_start(self):
         self.color = PINK
 
-    #setters
     def make_closed(self):
         self.color = RED
 
@@ -71,24 +65,17 @@ class Node:
 
     def update_neighbors(self, grid):
         self.neighbors = []
+        if self.row < self.total_rows - 1 and not grid[self.row + 1][self.col].is_barrier():
+            self.neighbors.append(grid[self.row + 1][self.col])  # DOWN
+        if self.row > 0 and not grid[self.row - 1][self.col].is_barrier():
+            self.neighbors.append(grid[self.row - 1][self.col])  # UP
+        if self.col < self.total_rows - 1 and not grid[self.row][self.col + 1].is_barrier():
+            self.neighbors.append(grid[self.row][self.col + 1])  # RIGHT
+        if self.col > 0 and not grid[self.row][self.col - 1].is_barrier():
+            self.neighbors.append(grid[self.row][self.col - 1])  # LEFT
 
-        if self.row < self.total_rows - 1 and not grid[self.row + 1][self.col].is_barrier(): # DOWN
-            self.neighbors.append(grid[self.row + 1][self.col])
-
-        if self.row > 0 and not grid[self.row - 1][self.col].is_barrier(): # UP
-            self.neighbors.append(grid[self.row - 1][self.col])
-
-        if self.col < self.total_rows - 1 and not grid[self.row][self.col + 1].is_barrier(): # RIGHT
-            self.neighbors.append(grid[self.row][self.col + 1])
-
-        if self.col < 0 and not grid[self.row][self.col - 1].is_barrier(): # LEFT
-            self.neighbors.append(grid[self.row][self.col - 1])
-
-
-    def __lt__(self, other): #lt = 'less than', for comparing two different nodes, will expand later
+    def __lt__(self, other):
         return False
-
-
 
 def reconstruct_path(came_from, current, draw):
     while current in came_from:
@@ -96,22 +83,14 @@ def reconstruct_path(came_from, current, draw):
         current.make_path()
         draw()
 
-def heuristics(point1, point2):
-    x1, y1 = point1
-    x2, y2 = point2
-    return abs(x1 - x2) + abs(y1 - y2)
-
-def AStar(draw, grid, start, end): #passing
+def UCS(draw, grid, start, end):
     count = 0
     open_set = PriorityQueue()
-    open_set.put((0, count, start)) #put equivalent to push/append, API for PriorityQueue DS
-    came_from = {} #keeps track of which node came from which node
+    open_set.put((0, count, start))
+    came_from = {}
 
-    g_score = {spot: float("inf") for row in grid for spot in row} #cost of the path from the starting node to a given node 'n'
+    g_score = {spot: float("inf") for row in grid for spot in row}
     g_score[start] = 0
-
-    f_score = {spot: float("inf") for row in grid for spot in row}  #f-score to determine which node to explore next. f(n) = g(n) + h(n).
-    f_score[start] = heuristics(start.get_position(), end.get_position())
 
     open_set_hash = {start}
 
@@ -126,7 +105,7 @@ def AStar(draw, grid, start, end): #passing
         if current == end:
             reconstruct_path(came_from, end, draw)
             end.make_end()
-            return True #make path
+            return True
 
         for neighbor in current.neighbors:
             temp_g_score = g_score[current] + 1
@@ -134,10 +113,9 @@ def AStar(draw, grid, start, end): #passing
             if temp_g_score < g_score[neighbor]:
                 came_from[neighbor] = current
                 g_score[neighbor] = temp_g_score
-                f_score[neighbor] = temp_g_score + heuristics(neighbor.get_position(), end.get_position())
                 if neighbor not in open_set_hash:
                     count += 1
-                    open_set.put((f_score[neighbor], count, neighbor))
+                    open_set.put((g_score[neighbor], count, neighbor))
                     open_set_hash.add(neighbor)
                     neighbor.make_open()
 
