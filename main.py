@@ -97,6 +97,9 @@ def main(SCREEN, width):
                         mode = key  # Update mode **only when clicked**
 
                         if mode == 'run' and start and end:
+                            for row in grid:
+                                for node in row:
+                                    node.update_neighbors(grid)
                             AStar(lambda: animated_draw(SCREEN, grid, ROWS, width), grid, start, end)
                         elif mode == 'reset':
                             start = None
