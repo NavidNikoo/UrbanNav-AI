@@ -43,6 +43,10 @@ class Button:
     def is_clicked(self, pos):
         return self.rect.collidepoint(pos)
 
+def animated_draw(screen, grid, rows, width):
+    draw(screen, grid, rows, width)
+    pygame.display.update()
+
 def main(SCREEN, width):
     mode = None
     ROWS = 25
@@ -74,14 +78,12 @@ def main(SCREEN, width):
         draw(SCREEN, grid, ROWS, width)
 
         # Draw buttons **last** so they appear correctly
-        button_rects = []
         for key, button in buttons.items():
             button.active = (mode == key)
             button.draw(SCREEN)
-            button_rects.append(button.rect)  # Store button areas for optimized updates
 
         # Only update button areas instead of the full screen
-        pygame.display.update(button_rects)
+        pygame.display.update()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -95,7 +97,7 @@ def main(SCREEN, width):
                         mode = key  # Update mode **only when clicked**
 
                         if mode == 'run' and start and end:
-                            AStar(lambda: draw(SCREEN, grid, ROWS, width), grid, start, end)
+                            AStar(lambda: animated_draw(SCREEN, grid, ROWS, width), grid, start, end)
                         elif mode == 'reset':
                             start = None
                             end = None
@@ -131,7 +133,7 @@ def main(SCREEN, width):
                     for row in grid:
                         for node in row:
                             node.update_neighbors(grid)
-                    AStar(lambda: draw(SCREEN, grid, ROWS, width), grid, start, end)
+                    AStar(lambda: animated_draw(SCREEN, grid, ROWS, width), grid, start, end)
 
                 if event.key == pygame.K_c:
                     start = None
