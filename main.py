@@ -105,7 +105,7 @@ def main(SCREEN, width):
                             for row in grid:
                                 for node in row:
                                     node.update_neighbors(grid)
-                            UCS(lambda: draw(SCREEN, grid, ROWS, width), grid, start, end)
+                            UCS(lambda: animated_draw(SCREEN, grid, ROWS, width), grid, start, end)
                         elif mode == 'reset':
                             start = None
                             end = None
