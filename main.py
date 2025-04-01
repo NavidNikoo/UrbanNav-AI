@@ -43,6 +43,10 @@ class Button:
     def is_clicked(self, pos):
         return self.rect.collidepoint(pos)
 
+def animated_draw(screen, grid, rows, width):
+    draw(screen, grid, rows, width)
+    pygame.display.update()
+
 def main(SCREEN, width):
     mode = None
     ROWS = 25
@@ -61,7 +65,7 @@ def main(SCREEN, width):
         'start': Button(230, button_y, "Start"),
         'goal': Button(340, button_y, "Goal"),
         'run': Button(450, button_y, "Run A*"),
-        'reset': Button(560, button_y, "Reset")
+        'reset': Button(560, button_y, "Reset"),
     }
 
     while running:
@@ -74,14 +78,12 @@ def main(SCREEN, width):
         draw(SCREEN, grid, ROWS, width)
 
         # Draw buttons **last** so they appear correctly
-        button_rects = []
         for key, button in buttons.items():
             button.active = (mode == key)
             button.draw(SCREEN)
-            button_rects.append(button.rect)  # Store button areas for optimized updates
 
         # Only update button areas instead of the full screen
-        pygame.display.update(button_rects)
+        pygame.display.update()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -98,7 +100,7 @@ def main(SCREEN, width):
                             for row in grid:
                                 for node in row:
                                     node.update_neighbors(grid)
-                            AStar(lambda: draw(SCREEN, grid, ROWS, width), grid, start, end)
+                            AStar(lambda: animated_draw(SCREEN, grid, ROWS, width), grid, start, end)
                         elif mode == 'reset':
                             start = None
                             end = None
@@ -107,16 +109,18 @@ def main(SCREEN, width):
             if pygame.mouse.get_pressed()[0]:  # Left click for grid
                 pos = pygame.mouse.get_pos()
                 row, col = get_clicked_position(pos, ROWS, width)
-                if row < ROWS and col < ROWS:  # Avoid clicking outside grid
+                if row < ROWS and col < ROWS:
                     spot = grid[row][col]
-                    if not start and spot != end:
+
+                    if mode == 'block' and spot != start and spot != end:
+                        spot.make_barrier()
+                    elif mode == 'start' and not start and spot != end:
                         start = spot
                         start.make_start()
-                    elif not end and spot != start:
+                    elif mode == 'goal' and not end and spot != start:
                         end = spot
                         end.make_end()
-                    elif spot != end and spot != start:
-                        spot.make_barrier()
+
 
             elif pygame.mouse.get_pressed()[2]:  # Right click to erase grid
                 pos = pygame.mouse.get_pos()
@@ -134,7 +138,12 @@ def main(SCREEN, width):
                     for row in grid:
                         for node in row:
                             node.update_neighbors(grid)
-                    AStar(lambda: draw(SCREEN, grid, ROWS, width), grid, start, end)
+                    AStar(lambda: animated_draw(SCREEN, grid, ROWS, width), grid, start, end)
+
+                if event.key == pygame.K_c:
+                    start = None
+                    end = None
+                    grid = make_grid(ROWS, width)
 
     pygame.quit()
 
