@@ -1,7 +1,7 @@
 import pygame
 import math
 from queue import PriorityQueue
-from algorithms import AStar, Node
+from algorithms import AStar, UCS
 from visualization import draw, make_grid, get_clicked_position
 
 # Initialize pygame
@@ -61,10 +61,10 @@ def main(SCREEN, width):
     button_y = HEIGHT - 80
     buttons = {
         'block': Button(10, button_y, "Block"),
-        'open': Button(120, button_y, "Open"),
-        'start': Button(230, button_y, "Start"),
-        'goal': Button(340, button_y, "Goal"),
-        'run': Button(450, button_y, "Run A*"),
+        'runA*': Button(120, button_y, "Run A*"),
+        'runUCS': Button(230, button_y, "Run UCS"),
+        'start': Button(340, button_y, "Start"),
+        'goal': Button(450, button_y, "Goal"),
         'reset': Button(560, button_y, "Reset"),
     }
 
@@ -96,11 +96,16 @@ def main(SCREEN, width):
                     if button.is_clicked(pos):
                         mode = key  # Update mode **only when clicked**
 
-                        if mode == 'run' and start and end:
+                        if mode == 'runA*' and start and end:
                             for row in grid:
                                 for node in row:
                                     node.update_neighbors(grid)
                             AStar(lambda: animated_draw(SCREEN, grid, ROWS, width), grid, start, end)
+                        elif mode == 'runUCS' and start and end:
+                            for row in grid:
+                                for node in row:
+                                    node.update_neighbors(grid)
+                            UCS(lambda: draw(SCREEN, grid, ROWS, width), grid, start, end)
                         elif mode == 'reset':
                             start = None
                             end = None
