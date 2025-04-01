@@ -29,6 +29,7 @@ def draw(SCREEN, grid, rows, width):
             node.draw(SCREEN)
 
     draw_grid(SCREEN, rows, width)
+    pygame.display.update()
 
 def make_grid(rows, width):
     grid = []
