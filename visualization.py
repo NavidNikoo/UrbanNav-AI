@@ -1,5 +1,5 @@
 import pygame
-from algorithms import Node
+from algorithm import Node
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -21,12 +21,25 @@ def draw_grid(SCREEN, rows, width):
             pygame.draw.line(SCREEN, BLACK, (j * GAP, 0), (j * GAP, width))
 
 
-def draw(SCREEN, grid, rows, width):
+def draw(SCREEN, grid, rows, width, show_icons=False):
     SCREEN.fill(WHITE)
+    font = pygame.font.SysFont("segoeuiemoji", 10)
+    icon_font = pygame.font.SysFont("segoeuiemoji", 14)
 
     for row in grid:
         for node in row:
             node.draw(SCREEN)
+            if node.heuristic > 0:
+                text = font.render(f"{node.heuristic:.1f}", True, BLACK)
+                SCREEN.blit(text, (node.x + 3, node.y + 3))
+
+            if show_icons:
+                if getattr(node, 'has_stop_sign', False):
+                    icon = icon_font.render("🛑", True, (0, 0, 0))
+                    SCREEN.blit(icon, (node.x + node.width // 4, node.y + node.width // 4))
+                elif getattr(node, 'traffic_light', None) == 'red':
+                    icon = icon_font.render("🚦", True, (0, 0, 0))
+                    SCREEN.blit(icon, (node.x + node.width // 4, node.y + node.width // 4))
 
     draw_grid(SCREEN, rows, width)
 
