@@ -2,6 +2,7 @@ import pygame
 import math
 from queue import PriorityQueue
 from visualization import draw, make_grid, get_clicked_position
+from algorithm import AStar, UCS, IterativeDeepening
 from torch_geometric.nn import GCNConv
 import torch
 import torch.nn as nn
@@ -74,6 +75,7 @@ def main(SCREEN, width):
         'stop': Button(START_X + 1 * (BUTTON_WIDTH + BUTTON_SPACING), BUTTON_Y, "Stop Sign"),
         'light': Button(START_X + 2 * (BUTTON_WIDTH + BUTTON_SPACING), BUTTON_Y, "Traffic"),
         'reset': Button(START_X + 3 * (BUTTON_WIDTH + BUTTON_SPACING), BUTTON_Y, "Reset"),
+        'runID': Button(START_X + 4 * (BUTTON_WIDTH + BUTTON_SPACING), BUTTON_Y, "runID"),
     }
 
     while running:
@@ -98,14 +100,17 @@ def main(SCREEN, width):
                             for row in grid:
                                 for node in row:
                                     node.update_neighbors(grid)
-                            from algorithm import AStar
                             AStar(lambda: animated_draw(SCREEN, grid, ROWS, width), grid, start, end)
                         elif mode == 'runUCS' and start and end:
                             for row in grid:
                                 for node in row:
                                     node.update_neighbors(grid)
-                            from algorithm import UCS
                             UCS(lambda: animated_draw(SCREEN, grid, ROWS, width), grid, start, end)
+                        elif mode == 'runID' and start and end:
+                            for row in grid:
+                                for node in row:
+                                    node.update_neighbors(grid)
+                            IterativeDeepening(lambda: animated_draw(SCREEN, grid, ROWS, width), grid, start, end)
                         elif mode == 'learn' and start and end:
                             for row in grid:
                                 for node in row:

@@ -269,3 +269,44 @@ def UCS(draw, grid, start, end):
             current.make_closed()
 
     return False
+
+#Depth limited Search
+def DLS(node, end, came_from, draw, depth, visited):
+    if depth == 0:
+        if node == end:
+            return True
+        return False
+
+    visited.add(node)
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+
+    for neighbor in node.neighbors:
+        if neighbor not in visited and not neighbor.is_barrier():
+            came_from[neighbor] = node
+            neighbor.make_open()
+            draw()
+            pygame.time.delay(10)
+
+            if DLS(neighbor, end, came_from, draw, depth - 1, visited):
+                return True
+
+    if not node.is_start():
+        node.make_closed()
+        draw()
+
+    return False
+
+#Iterative Deepening
+def IterativeDeepening(draw, grid, start, end):
+    max_depth = len(grid) * len(grid[0])
+    came_from = {}
+
+    for depth in range(max_depth):
+        visited = set()
+        if DLS(start, end, came_from, draw, depth, visited):
+            reconstruct_path(came_from, end, draw)
+            end.make_end()
+            return True
+    return False
