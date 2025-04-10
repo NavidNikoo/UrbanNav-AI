@@ -1,12 +1,6 @@
 import pygame
-import math
-from queue import PriorityQueue
 from visualization import draw, make_grid, get_clicked_position
-from algorithm import AStar, UCS, IterativeDeepening
-from torch_geometric.nn import GCNConv
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
+from algorithm import AStar, UCS, IterativeDeepening, show_stats_pygame
 from heuristic_update import update_heuristics, feedback_learn_and_update
 
 # Initialize pygame
@@ -61,6 +55,9 @@ def main(SCREEN, width):
     start = None
     end = None
     running = True
+    last_algo = None
+    last_time = None
+    history_log = []
     clock = pygame.time.Clock()
 
     buttons = {
@@ -70,6 +67,7 @@ def main(SCREEN, width):
         'runA*': Button(START_X + 2 * (BUTTON_WIDTH + BUTTON_SPACING), BUTTON_Y - 50, "Run A*"),
         'runUCS': Button(START_X + 3 * (BUTTON_WIDTH + BUTTON_SPACING), BUTTON_Y - 50, "Run UCS"),
         'learn': Button(START_X + 4 * (BUTTON_WIDTH + BUTTON_SPACING), BUTTON_Y - 50, "Learn"),
+        'stats': Button(START_X + 5 * (BUTTON_WIDTH + BUTTON_SPACING), BUTTON_Y - 50, "Stats"),
         # Bottom row
         'block': Button(START_X + 0 * (BUTTON_WIDTH + BUTTON_SPACING), BUTTON_Y, "Block"),
         'stop': Button(START_X + 1 * (BUTTON_WIDTH + BUTTON_SPACING), BUTTON_Y, "Stop Sign"),
@@ -100,17 +98,26 @@ def main(SCREEN, width):
                             for row in grid:
                                 for node in row:
                                     node.update_neighbors(grid)
-                            AStar(lambda: animated_draw(SCREEN, grid, ROWS, width), grid, start, end)
+                            found, exec_time = AStar(lambda: animated_draw(SCREEN, grid, ROWS, width), grid, start, end)
+                            last_algo = "A* Search"
+                            last_time = exec_time
+                            history_log.append((last_algo, last_time))
                         elif mode == 'runUCS' and start and end:
                             for row in grid:
                                 for node in row:
                                     node.update_neighbors(grid)
-                            UCS(lambda: animated_draw(SCREEN, grid, ROWS, width), grid, start, end)
+                            found, exec_time = UCS(lambda: animated_draw(SCREEN, grid, ROWS, width), grid, start, end)
+                            last_algo = "Uniform Cost Search"
+                            last_time = exec_time
+                            history_log.append((last_algo, last_time))
                         elif mode == 'runID' and start and end:
                             for row in grid:
                                 for node in row:
                                     node.update_neighbors(grid)
-                            IterativeDeepening(lambda: animated_draw(SCREEN, grid, ROWS, width), grid, start, end)
+                            found, exec_time = IterativeDeepening(lambda: animated_draw(SCREEN, grid, ROWS, width), grid, start, end)
+                            last_algo = "Iterative Deepening Search"
+                            last_time = exec_time
+                            history_log.append((last_algo, last_time))
                         elif mode == 'learn' and start and end:
                             for row in grid:
                                 for node in row:
@@ -120,6 +127,10 @@ def main(SCREEN, width):
                             start = None
                             end = None
                             grid = make_grid(ROWS, width)
+                        elif mode == 'stats':
+                            if last_algo and last_time is not None:
+                                show_stats_pygame(SCREEN, last_algo, last_time, history_log)
+                                mode = None
 
             if pygame.mouse.get_pressed()[0]:
                 row, col = get_clicked_position(pygame.mouse.get_pos(), ROWS, width)

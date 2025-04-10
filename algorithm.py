@@ -1,5 +1,6 @@
 import pygame
 import heapq
+import time
 from queue import PriorityQueue
 
 BLACK = (0, 0, 0)
@@ -134,54 +135,8 @@ def heuristics(point1, point2):
     x2, y2 = point2
     return abs(x1 - x2) + abs(y1 - y2)
 
-# def AStar(draw, grid, start, end): #passing
-#     count = 0
-#     open_set = PriorityQueue()
-#     open_set.put((0, count, start)) #put equivalent to push/append, API for PriorityQueue DS
-#     came_from = {} #keeps track of which node came from which node
-
-#     g_score = {spot: float("inf") for row in grid for spot in row} #cost of the path from the starting node to a given node 'n'
-#     g_score[start] = 0
-
-#     f_score = {spot: float("inf") for row in grid for spot in row}  #f-score to determine which node to explore next. f(n) = g(n) + h(n).
-#     f_score[start] = heuristics(start.get_position(), end.get_position())
-
-#     open_set_hash = {start}
-
-#     while not open_set.empty():
-#         for event in pygame.event.get():
-#             if event.type == pygame.QUIT:
-#                 pygame.quit()
-
-#         current = open_set.get()[2]
-#         open_set_hash.remove(current)
-
-#         if current == end:
-#             reconstruct_path(came_from, end, draw)
-#             end.make_end()
-#             return True #make path
-
-#         for neighbor in current.neighbors:
-#             temp_g_score = g_score[current] + 1
-
-#             if temp_g_score < g_score[neighbor]:
-#                 came_from[neighbor] = current
-#                 g_score[neighbor] = temp_g_score
-#                 f_score[neighbor] = temp_g_score + heuristics(neighbor.get_position(), end.get_position())
-#                 if neighbor not in open_set_hash:
-#                     count += 1
-#                     open_set.put((f_score[neighbor], count, neighbor))
-#                     open_set_hash.add(neighbor)
-#                     neighbor.make_open()
-
-#         draw()
-
-#         if current != start:
-#             current.make_closed()
-
-#     return False
-
 def AStar(draw, grid, start, end):
+    start_time = time.time()
     count = 0
     open_set = []
     heapq.heappush(open_set, (start.heuristic, count, start))
@@ -204,7 +159,8 @@ def AStar(draw, grid, start, end):
             reconstruct_path(came_from, end, draw)
             end.make_end()
             start.make_start()
-            return True
+            return True, time.time() - start_time #(true for finding end, algo exec time)
+
 
         for neighbor in current.neighbors:
             temp_g_score = g_score[current] + 1
@@ -225,9 +181,10 @@ def AStar(draw, grid, start, end):
         if current != start:
             current.make_closed()
 
-    return False
+    return False, time.time() - start_time
 
 def UCS(draw, grid, start, end):
+    start_time = time.time()
     count = 0
     open_set = PriorityQueue()
     open_set.put((0, count, start))
@@ -249,7 +206,7 @@ def UCS(draw, grid, start, end):
         if current == end:
             reconstruct_path(came_from, end, draw)
             end.make_end()
-            return True
+            return True, time.time() - start_time
 
         for neighbor in current.neighbors:
             temp_g_score = g_score[current] + 1
@@ -268,7 +225,7 @@ def UCS(draw, grid, start, end):
         if current != start:
             current.make_closed()
 
-    return False
+    return False, time.time() - start_time
 
 #Depth limited Search
 def DLS(node, end, came_from, draw, depth, visited):
@@ -300,6 +257,7 @@ def DLS(node, end, came_from, draw, depth, visited):
 
 #Iterative Deepening
 def IterativeDeepening(draw, grid, start, end):
+    start_time = time.time()
     max_depth = len(grid) * len(grid[0])
     came_from = {}
 
@@ -308,5 +266,62 @@ def IterativeDeepening(draw, grid, start, end):
         if DLS(start, end, came_from, draw, depth, visited):
             reconstruct_path(came_from, end, draw)
             end.make_end()
-            return True
-    return False
+            return True, time.time() - start_time
+    return False, time.time() - start_time
+
+WIDTH = 700
+HEIGHT = 850
+
+def show_stats_pygame(screen, algo, exec_time, history_log):
+    overlay_width, overlay_height = 420, 300
+    overlay_x = (WIDTH - overlay_width) // 2
+    overlay_y = (HEIGHT - overlay_height) // 2
+
+    overlay_rect = pygame.Rect(overlay_x, overlay_y, overlay_width, overlay_height)
+    font = pygame.font.SysFont('arial', 22, bold=True)
+    small_font = pygame.font.SysFont('arial', 18)
+
+    close_button = pygame.Rect(overlay_x + 160, overlay_y + 240, 100, 40)
+    showing = True
+
+    while showing:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if close_button.collidepoint(event.pos):
+                    showing = False
+
+        # Dim background
+        dim_surface = pygame.Surface((WIDTH, HEIGHT))
+        dim_surface.set_alpha(180)
+        dim_surface.fill((255, 255, 255))
+        screen.blit(dim_surface, (0, 0))
+
+        # Draw modal
+        pygame.draw.rect(screen, (220, 220, 220), overlay_rect, border_radius=10)
+        pygame.draw.rect(screen, (0, 0, 0), overlay_rect, 3, border_radius=10)
+
+        # Close button
+        pygame.draw.rect(screen, (180, 180, 180), close_button, border_radius=6)
+        pygame.draw.rect(screen, (0, 0, 0), close_button, 2, border_radius=6)
+        close_text = font.render("Close", True, BLACK)
+        screen.blit(close_text, close_text.get_rect(center=close_button.center))
+
+        # Current run
+        algo_text = font.render(f"Algorithm: {algo}", True, BLACK)
+        time_text = font.render(f"Execution Time: {exec_time:.6f} seconds", True, BLACK)
+        screen.blit(algo_text, (overlay_x + 20, overlay_y + 20))
+        screen.blit(time_text, (overlay_x + 20, overlay_y + 60))
+
+        # History
+        history_title = small_font.render("Previous Runs:", True, (60, 60, 60))
+        screen.blit(history_title, (overlay_x + 20, overlay_y + 100))
+
+        # Show last 5 entries
+        for i, (h_algo, h_time) in enumerate(history_log[-5:]):
+            entry = small_font.render(f"{i + 1}. {h_algo} – {h_time:.3f}s", True, (50, 50, 50))
+            screen.blit(entry, (overlay_x + 20, overlay_y + 125 + i * 20))
+
+        pygame.display.update()
