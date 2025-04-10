@@ -273,15 +273,23 @@ WIDTH = 700
 HEIGHT = 850
 
 def show_stats_pygame(screen, algo, exec_time, history_log):
-    overlay_width, overlay_height = 420, 300
+    font = pygame.font.SysFont('arial', 22, bold=True)
+    small_font = pygame.font.SysFont('arial', 18)
+
+    # Dynamic height based on history size
+    base_height = 150
+    history_line_height = 20
+    padding = 110  # Space for algo + exec time + close button
+    visible_entries = len(history_log)
+
+    overlay_height = base_height + (visible_entries * history_line_height) + 30  # Add margin
+    overlay_width = 420
     overlay_x = (WIDTH - overlay_width) // 2
     overlay_y = (HEIGHT - overlay_height) // 2
 
     overlay_rect = pygame.Rect(overlay_x, overlay_y, overlay_width, overlay_height)
-    font = pygame.font.SysFont('arial', 22, bold=True)
-    small_font = pygame.font.SysFont('arial', 18)
-
-    close_button = pygame.Rect(overlay_x + 160, overlay_y + 240, 100, 40)
+    close_button_y = overlay_y + 125 + (visible_entries * history_line_height) + 10
+    close_button = pygame.Rect(overlay_x + 160, close_button_y, 100, 40)
     showing = True
 
     while showing:
@@ -293,13 +301,13 @@ def show_stats_pygame(screen, algo, exec_time, history_log):
                 if close_button.collidepoint(event.pos):
                     showing = False
 
-        # Dim background
+        # Dim the background
         dim_surface = pygame.Surface((WIDTH, HEIGHT))
         dim_surface.set_alpha(180)
         dim_surface.fill((255, 255, 255))
         screen.blit(dim_surface, (0, 0))
 
-        # Draw modal
+        # Draw modal background
         pygame.draw.rect(screen, (220, 220, 220), overlay_rect, border_radius=10)
         pygame.draw.rect(screen, (0, 0, 0), overlay_rect, 3, border_radius=10)
 
@@ -315,13 +323,13 @@ def show_stats_pygame(screen, algo, exec_time, history_log):
         screen.blit(algo_text, (overlay_x + 20, overlay_y + 20))
         screen.blit(time_text, (overlay_x + 20, overlay_y + 60))
 
-        # History
+        # History header
         history_title = small_font.render("Previous Runs:", True, (60, 60, 60))
         screen.blit(history_title, (overlay_x + 20, overlay_y + 100))
 
-        # Show last 5 entries
-        for i, (h_algo, h_time) in enumerate(history_log[-5:]):
+        # Draw all runs in FIFO order
+        for i, (h_algo, h_time) in enumerate(history_log):
             entry = small_font.render(f"{i + 1}. {h_algo} – {h_time:.3f}s", True, (50, 50, 50))
-            screen.blit(entry, (overlay_x + 20, overlay_y + 125 + i * 20))
+            screen.blit(entry, (overlay_x + 20, overlay_y + 125 + i * history_line_height))
 
         pygame.display.update()
