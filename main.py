@@ -11,7 +11,7 @@ pygame.font.init()
 WIDTH = 700
 HEIGHT = 850  # Increased to fit all buttons
 SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("AI Car with GNN")
+pygame.display.set_caption("Searching Algorithm Comparation")
 
 # Colors
 BLACK = (0, 0, 0)
@@ -98,26 +98,26 @@ def main(SCREEN, width):
                             for row in grid:
                                 for node in row:
                                     node.update_neighbors(grid)
-                            found, exec_time = AStar(lambda: animated_draw(SCREEN, grid, ROWS, width), grid, start, end)
+                            found, exec_time, explored_count = AStar(lambda: animated_draw(SCREEN, grid, ROWS, width), grid, start, end)
                             last_algo = "A* Search"
                             last_time = exec_time
-                            history_log.append((last_algo, last_time))
+                            history_log.append((last_algo, last_time,explored_count))
                         elif mode == 'runUCS' and start and end:
                             for row in grid:
                                 for node in row:
                                     node.update_neighbors(grid)
-                            found, exec_time = UCS(lambda: animated_draw(SCREEN, grid, ROWS, width), grid, start, end)
+                            found, exec_time,explored_count = UCS(lambda: animated_draw(SCREEN, grid, ROWS, width), grid, start, end)
                             last_algo = "Uniform Cost Search"
                             last_time = exec_time
-                            history_log.append((last_algo, last_time))
+                            history_log.append((last_algo, last_time,explored_count))
                         elif mode == 'runID' and start and end:
                             for row in grid:
                                 for node in row:
                                     node.update_neighbors(grid)
-                            found, exec_time = IterativeDeepening(lambda: animated_draw(SCREEN, grid, ROWS, width), grid, start, end)
+                            found, exec_time,explored_count = IterativeDeepening(lambda: animated_draw(SCREEN, grid, ROWS, width), grid, start, end)
                             last_algo = "Iterative Deepening Search"
                             last_time = exec_time
-                            history_log.append((last_algo, last_time))
+                            history_log.append((last_algo, last_time,explored_count))
                         elif mode == 'learn' and start and end:
                             for row in grid:
                                 for node in row:
@@ -129,7 +129,7 @@ def main(SCREEN, width):
                             grid = make_grid(ROWS, width)
                         elif mode == 'stats':
                             if last_algo and last_time is not None:
-                                show_stats_pygame(SCREEN, last_algo, last_time, history_log)
+                                show_stats_pygame(SCREEN, last_algo, last_time, history_log[-1][2], history_log)
                                 mode = None
 
             if pygame.mouse.get_pressed()[0]:

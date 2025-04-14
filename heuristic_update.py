@@ -18,7 +18,7 @@ def update_heuristics(grid, goal):
             if getattr(node, 'has_stop_sign', False):
                 base_heuristic += 0.5
             if getattr(node, 'traffic_light', None) == 'red':
-                base_heuristic += 1.0
+                base_heuristic += 0.5
 
             node.heuristic = round(base_heuristic, 1)
 
@@ -74,11 +74,11 @@ def feedback_learn_and_update(grid, start, goal, iterations=5, alpha=0.2, beta=1
 
                 base_penalty = beta
                 if getattr(node, 'has_stop_sign', False):
-                    base_penalty += 0.3
+                    base_penalty += 0.5
                 if getattr(node, 'traffic_light', None) == 'red':
                     base_penalty += 0.5
 
                 if node in path_set:
                     node.heuristic = max(0.0, node.heuristic - alpha)
                 else:
-                    node.heuristic += base_penalty
+                    node.heuristic += base_penalty*5
