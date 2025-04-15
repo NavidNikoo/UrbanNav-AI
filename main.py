@@ -98,26 +98,29 @@ def main(SCREEN, width):
                             for row in grid:
                                 for node in row:
                                     node.update_neighbors(grid)
-                            found, exec_time, explored_count = AStar(lambda: animated_draw(SCREEN, grid, ROWS, width), grid, start, end)
+                            found, exec_time, explored_count, memory_usage_kb = AStar(lambda: animated_draw(SCREEN, grid, ROWS, width), grid, start, end)
                             last_algo = "A* Search"
                             last_time = exec_time
-                            history_log.append((last_algo, last_time,explored_count))
+                            last_memory = memory_usage_kb
+                            history_log.append((last_algo, last_time,explored_count, last_memory))
                         elif mode == 'runUCS' and start and end:
                             for row in grid:
                                 for node in row:
                                     node.update_neighbors(grid)
-                            found, exec_time,explored_count = UCS(lambda: animated_draw(SCREEN, grid, ROWS, width), grid, start, end)
+                            found, exec_time,explored_count, memory_usage_kb = UCS(lambda: animated_draw(SCREEN, grid, ROWS, width), grid, start, end)
                             last_algo = "Uniform Cost Search"
                             last_time = exec_time
-                            history_log.append((last_algo, last_time,explored_count))
+                            last_memory = memory_usage_kb
+                            history_log.append((last_algo, last_time,explored_count, last_memory))
                         elif mode == 'runID' and start and end:
                             for row in grid:
                                 for node in row:
                                     node.update_neighbors(grid)
-                            found, exec_time,explored_count = IterativeDeepening(lambda: animated_draw(SCREEN, grid, ROWS, width), grid, start, end)
+                            found, exec_time,explored_count, memory_usage_kb = IterativeDeepening(lambda: animated_draw(SCREEN, grid, ROWS, width), grid, start, end)
                             last_algo = "Iterative Deepening Search"
                             last_time = exec_time
-                            history_log.append((last_algo, last_time,explored_count))
+                            last_memory = memory_usage_kb
+                            history_log.append((last_algo, last_time,explored_count, last_memory))
                         elif mode == 'learn' and start and end:
                             for row in grid:
                                 for node in row:
@@ -128,8 +131,8 @@ def main(SCREEN, width):
                             end = None
                             grid = make_grid(ROWS, width)
                         elif mode == 'stats':
-                            if last_algo and last_time is not None:
-                                show_stats_pygame(SCREEN, last_algo, last_time, history_log[-1][2], history_log)
+                            if last_algo and last_time and last_memory is not None:
+                                show_stats_pygame(SCREEN, last_algo, last_time, history_log[-1][2], last_memory, history_log)
                                 mode = None
 
             if pygame.mouse.get_pressed()[0]:

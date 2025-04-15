@@ -1,6 +1,7 @@
 import pygame
 import heapq
 import time
+import tracemalloc
 from queue import PriorityQueue
 
 BLACK = (0, 0, 0)
@@ -136,6 +137,7 @@ def heuristics(point1, point2):
     return abs(x1 - x2) + abs(y1 - y2)
 
 def AStar(draw, grid, start, end):
+    tracemalloc.start()
     start_time = time.time()
     count = 0
     explored_count = 0
@@ -160,7 +162,9 @@ def AStar(draw, grid, start, end):
             reconstruct_path(came_from, end, draw)
             end.make_end()
             start.make_start()
-            return True, time.time() - start_time, explored_count #(true for finding end, algo exec time)
+            current, peak = tracemalloc.get_traced_memory()
+            tracemalloc.stop()
+            return True, time.time() - start_time, explored_count, peak / 1024 #(true for finding end, algo exec time)
 
 
         for neighbor in current.neighbors:
@@ -182,10 +186,12 @@ def AStar(draw, grid, start, end):
         if current != start:
             current.make_closed()
             explored_count +=1
-
-    return False, time.time() - start_time, explored_count
+    peak = tracemalloc.get_traced_memory()
+    tracemalloc.stop()
+    return False, time.time() - start_time, explored_count, peak / 1024
 
 def UCS(draw, grid, start, end):
+    tracemalloc.start()
     start_time = time.time()
     count = 0
     explored_count = 0
@@ -209,7 +215,9 @@ def UCS(draw, grid, start, end):
         if current == end:
             reconstruct_path(came_from, end, draw)
             end.make_end()
-            return True, time.time() - start_time, explored_count
+            peak = tracemalloc.get_traced_memory()
+            tracemalloc.stop()
+            return True, time.time() - start_time, explored_count, peak[1] / 1024
 
         for neighbor in current.neighbors:
             temp_g_score = g_score[current] + 1
@@ -229,7 +237,9 @@ def UCS(draw, grid, start, end):
             current.make_closed()
             explored_count +=1
 
-    return False, time.time() - start_time,explored_count
+    peak = tracemalloc.get_traced_memory()
+    tracemalloc.stop()
+    return False, time.time() - start_time, explored_count, peak[1] / 1024
 
 def DLS(node, end, came_from, draw, depth, visited):
     if node == end:
@@ -261,6 +271,7 @@ def DLS(node, end, came_from, draw, depth, visited):
 
 #Iterative Deepening
 def IterativeDeepening(draw, grid, start, end):
+    tracemalloc.start()
     start_time = time.time()
     max_depth = len(grid) * len(grid[0])
     came_from = {}
@@ -270,24 +281,28 @@ def IterativeDeepening(draw, grid, start, end):
         if DLS(start, end, came_from, draw, depth, visited):
             reconstruct_path(came_from, end, draw)
             end.make_end()
-            return True, time.time() - start_time, len(visited)
-    return False, time.time() - start_time, 0
+            peak = tracemalloc.get_traced_memory()
+            tracemalloc.stop()
+            return True, time.time() - start_time, len(visited), peak[1] / 1024
+    peak = tracemalloc.get_traced_memory()
+    tracemalloc.stop()
+    return False, time.time() - start_time, 0, peak[1] / 1024
 
 WIDTH = 700
 HEIGHT = 850
 
-def show_stats_pygame(screen, algo, exec_time, explored_count, history_log):
+def show_stats_pygame(screen, algo, exec_time, explored_count, memory_usage_kb, history_log):
     font = pygame.font.SysFont('arial', 22, bold=True)
     small_font = pygame.font.SysFont('arial', 18)
 
     history_line_height = 20
     visible_entries = len(history_log)
 
-    overlay_width = 460
+    overlay_width = 560
     overlay_x = (WIDTH - overlay_width) // 2
 
     top_padding = 20
-    line_height = 40
+    line_height = 30
     stat_lines = 3
     section_gap = 20
 
@@ -327,14 +342,16 @@ def show_stats_pygame(screen, algo, exec_time, explored_count, history_log):
         screen.blit(font.render(f"Execution Time: {exec_time:.6f} seconds", True, BLACK), (overlay_x + 20, y_cursor))
         y_cursor += line_height
         screen.blit(font.render(f"Explored Nodes: {explored_count}", True, BLACK), (overlay_x + 20, y_cursor))
+        y_cursor += line_height
+        screen.blit(font.render(f"Peak Memory: {memory_usage_kb:.2f} KB", True, BLACK), (overlay_x + 20, y_cursor))
         y_cursor += section_gap
 
         # History section
         screen.blit(small_font.render("Previous Runs:", True, (60, 60, 60)), (overlay_x + 20, y_cursor))
         y_cursor += section_gap
 
-        for i, (h_algo, h_time, h_explored) in enumerate(history_log):
-            entry = small_font.render(f"{i + 1}. {h_algo} – {h_time:.3f}s – {h_explored} nodes", True, (50, 50, 50))
+        for i, (h_algo, h_time, h_explored, h_memory) in enumerate(history_log):
+            entry = small_font.render(f"{i + 1}. {h_algo} – {h_time:.3f}s – {h_explored} nodes - {h_memory:.2f} KB", True, (50, 50, 50))
             screen.blit(entry, (overlay_x + 20, y_cursor + i * history_line_height))
 
         # Close button at bottom
