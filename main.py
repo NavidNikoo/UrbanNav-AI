@@ -3,9 +3,17 @@ from visualization import draw, make_grid, get_clicked_position
 from algorithm import AStar, UCS, IterativeDeepening, show_stats_pygame
 from heuristic_update import update_heuristics, feedback_learn_and_update
 
+
 # Initialize pygame
 pygame.init()
 pygame.font.init()
+
+stop_img = pygame.image.load("assests/stop.png")
+traffic_img = pygame.image.load("assests/traffic.png")
+
+# Resize to fit your grid squares (adjust size as needed)
+stop_img = pygame.transform.scale(stop_img, (18, 18))
+traffic_img = pygame.transform.scale(traffic_img, (18, 18))
 
 # Window settings
 WIDTH = 700
@@ -45,7 +53,7 @@ class Button:
         return self.rect.collidepoint(pos)
 
 def animated_draw(screen, grid, rows, width):
-    draw(screen, grid, rows, width)
+    draw(SCREEN, grid, rows, width, show_icons=True, stop_img=stop_img, traffic_img=traffic_img)
     pygame.display.update()
 
 def main(SCREEN, width):
@@ -79,7 +87,7 @@ def main(SCREEN, width):
     while running:
         clock.tick(60)
         SCREEN.fill(WHITE)
-        draw(SCREEN, grid, ROWS, width, show_icons=True)
+        draw(SCREEN, grid, ROWS, width, show_icons=True, stop_img=stop_img, traffic_img=traffic_img)
         for key, button in buttons.items():
             button.active = (mode == key)
             button.draw(SCREEN)

@@ -21,7 +21,7 @@ def draw_grid(SCREEN, rows, width):
             pygame.draw.line(SCREEN, BLACK, (j * GAP, 0), (j * GAP, width))
 
 
-def draw(SCREEN, grid, rows, width, show_icons=False):
+def draw(SCREEN, grid, rows, width, show_icons=False, stop_img=None, traffic_img=None):
     SCREEN.fill(WHITE)
     font = pygame.font.SysFont("segoeuiemoji", 10)
     icon_font = pygame.font.SysFont("segoeuiemoji", 14)
@@ -34,12 +34,10 @@ def draw(SCREEN, grid, rows, width, show_icons=False):
                 SCREEN.blit(text, (node.x + 3, node.y + 3))
 
             if show_icons:
-                if getattr(node, 'has_stop_sign', False):
-                    icon = icon_font.render("🛑", True, (0, 0, 0))
-                    SCREEN.blit(icon, (node.x + node.width // 4, node.y + node.width // 4))
-                elif getattr(node, 'traffic_light', None) == 'red':
-                    icon = icon_font.render("🚦", True, (0, 0, 0))
-                    SCREEN.blit(icon, (node.x + node.width // 4, node.y + node.width // 4))
+                if getattr(node, 'has_stop_sign', False) and stop_img:
+                    SCREEN.blit(stop_img, (node.x + node.width // 4, node.y + node.width // 4))
+                elif getattr(node, 'traffic_light', None) == 'red' and traffic_img:
+                    SCREEN.blit(traffic_img, (node.x + node.width // 4, node.y + node.width // 4))
 
     draw_grid(SCREEN, rows, width)
 
