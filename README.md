@@ -3,7 +3,9 @@ A client-server WebSocket-based chat system that allows team members to communic
 
 ## Team Members
 - Biplove GC
-- Guido Asbun
+- Navid Nikoo
+- MinJae Kim
+- Adam Kaci
 
 ##  Key Features
 - 
@@ -14,7 +16,7 @@ Using Python version 3.12.6
 - Python: Install Python 3.10 or later.
 - Virtual Environment: Setup virtual environment
 - pip: Ensure you have `pip` installed to manage Python packages.
-- FlaskSocketIo: Install Flask-SocketIO
+- Pygame: Install Pygame
 
 ## Setup Instructions
 1. Clone the Repository
