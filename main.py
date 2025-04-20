@@ -8,8 +8,8 @@ from heuristic_update import update_heuristics, feedback_learn_and_update
 pygame.init()
 pygame.font.init()
 
-stop_img = pygame.image.load("assests/stop.png")
-traffic_img = pygame.image.load("assests/traffic.png")
+stop_img = pygame.image.load("stop.png")
+traffic_img = pygame.image.load("traffic.png")
 
 # Resize to fit your grid squares (adjust size as needed)
 stop_img = pygame.transform.scale(stop_img, (18, 18))
