@@ -7,6 +7,7 @@ def heuristic_cost_estimate(node1, node2):
     dy = node1.col - node2.col
     return math.sqrt(dx ** 2 + dy ** 2)
 
+# Update Hueristics on the node with stop sign and traffic light
 def update_heuristics(grid, goal):
     for row in grid:
         for node in row:
@@ -37,6 +38,7 @@ def get_astar_path(grid, start, end):
         current = heapq.heappop(open_set)[2]
         open_set_hash.remove(current)
 
+        # return the optimal path -> true value for training
         if current == end:
             path = []
             while current in came_from:
@@ -71,14 +73,15 @@ def feedback_learn_and_update(grid, start, goal, iterations=5, alpha=0.2, beta=1
             for node in row:
                 if node.is_barrier():
                     continue
-
+                # increase heuristics on stop sign and traffic
                 base_penalty = beta
                 if getattr(node, 'has_stop_sign', False):
                     base_penalty += 0.5
                 if getattr(node, 'traffic_light', None) == 'red':
                     base_penalty += 0.5
-
+                # decrease heuristics on optimal path
                 if node in path_set:
                     node.heuristic = max(0.0, node.heuristic - alpha)
+                # increase heuristics on non-optimal path
                 else:
                     node.heuristic += base_penalty*5
