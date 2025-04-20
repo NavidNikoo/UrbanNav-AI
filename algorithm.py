@@ -4,6 +4,10 @@ import time
 import tracemalloc
 from queue import PriorityQueue
 
+# ==============================
+# Colors
+# ==============================
+
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
@@ -15,6 +19,11 @@ GRAY = (128, 128, 128)
 PURPLE = (128, 0, 128)
 TURQUOISE = (48, 213, 200)
 
+# ==============================
+# Grid Drawing Functions
+# ==============================
+
+# Grid drawing functions
 def draw_grid(SCREEN, rows, width):
     GAP = width // rows
     # horizontal lines
@@ -26,8 +35,8 @@ def draw_grid(SCREEN, rows, width):
 
 
 def draw(SCREEN, grid, rows, width):
+    # Draws all nodes and overlays the grid lines
     SCREEN.fill(WHITE)
-
     for row in grid:
         for node in row:
             node.draw(SCREEN)
@@ -35,6 +44,7 @@ def draw(SCREEN, grid, rows, width):
     draw_grid(SCREEN, rows, width)
 
 def make_grid(rows, width):
+    # Creates a 2D list of Node objects
     grid = []
     GAP = width // rows
     for i in range(rows):
@@ -53,6 +63,10 @@ def get_clicked_position(position, rows, width):
     col = x // GAP
 
     return row, col
+    
+# ==============================
+#  Node Class
+# ==============================
 
 class Node:
     def __init__(self, row, col, width, total_rows):
@@ -111,7 +125,7 @@ class Node:
         
     def get_position(self):
         return (self.row, self.col)
-
+    # Updates list of accessible neighboring nodes
     def update_neighbors(self, grid):
         self.neighbors = []
         if self.row < self.total_rows - 1 and not grid[self.row + 1][self.col].is_barrier():
@@ -124,7 +138,12 @@ class Node:
             self.neighbors.append(grid[self.row][self.col - 1])
     def __lt__(self, other): #lt = 'less than', for comparing two different nodes, will expand later
         return False
+        
+# ==============================
+# Path Reconstruction
+# ==============================
 
+# Backtracks the path once the goal is found.
 def reconstruct_path(came_from, current, draw):
     while current in came_from:
         current = came_from[current]
@@ -135,6 +154,10 @@ def heuristics(point1, point2):
     x1, y1 = point1
     x2, y2 = point2
     return abs(x1 - x2) + abs(y1 - y2)
+
+# ==============================
+# A* Search Algorithm
+# ==============================
 
 def AStar(draw, grid, start, end):
     tracemalloc.start()
@@ -190,6 +213,10 @@ def AStar(draw, grid, start, end):
     tracemalloc.stop()
     return False, time.time() - start_time, explored_count, peak / 1024
 
+# ==============================
+# Uniform Cost Search (UCS)
+# ==============================
+
 def UCS(draw, grid, start, end):
     tracemalloc.start()
     start_time = time.time()
@@ -241,6 +268,10 @@ def UCS(draw, grid, start, end):
     tracemalloc.stop()
     return False, time.time() - start_time, explored_count, peak[1] / 1024
 
+# ==============================
+# Iterative Deepening Search
+# ==============================
+
 def DLS(node, end, came_from, draw, depth, visited):
     if node == end:
         return True
@@ -288,9 +319,14 @@ def IterativeDeepening(draw, grid, start, end):
     tracemalloc.stop()
     return False, time.time() - start_time, 0, peak[1] / 1024
 
+# ==============================
+# Modal Popup for Stats
+# ==============================
+
 WIDTH = 700
 HEIGHT = 850
 
+# Displays algorithm stats and history in a modal overlay
 def show_stats_pygame(screen, algo, exec_time, explored_count, memory_usage_kb, history_log):
     font = pygame.font.SysFont('arial', 22, bold=True)
     small_font = pygame.font.SysFont('arial', 18)
@@ -314,7 +350,7 @@ def show_stats_pygame(screen, algo, exec_time, explored_count, memory_usage_kb, 
     overlay_y = (HEIGHT - overlay_height) // 2
 
     overlay_rect = pygame.Rect(overlay_x, overlay_y, overlay_width, overlay_height)
-
+    #draw loop
     showing = True
     while showing:
         for event in pygame.event.get():
