@@ -32,7 +32,7 @@ class Button:
         self.text = text
         self.color = LIGHT_GRAY
         self.active = False
-
+    # Draws button with text and color based on active state
     def draw(self, win):
         color = DARK_GRAY if self.active else self.color
         pygame.draw.rect(win, color, self.rect, border_radius=8)
@@ -40,7 +40,7 @@ class Button:
         text_surface = font.render(self.text, True, BLACK)
         text_rect = text_surface.get_rect(center=self.rect.center)
         win.blit(text_surface, text_rect)
-
+    # Checks if the button is clicked
     def is_clicked(self, pos):
         return self.rect.collidepoint(pos)
 
@@ -48,6 +48,7 @@ def animated_draw(screen, grid, rows, width):
     draw(screen, grid, rows, width)
     pygame.display.update()
 
+# Main application loop
 def main(SCREEN, width):
     mode = None
     ROWS = 25
@@ -60,6 +61,7 @@ def main(SCREEN, width):
     history_log = []
     clock = pygame.time.Clock()
 
+    # buttons for controls
     buttons = {
         # Top row
         'start': Button(START_X + 0 * (BUTTON_WIDTH + BUTTON_SPACING), BUTTON_Y - 50, "Start"),
@@ -75,10 +77,12 @@ def main(SCREEN, width):
         'reset': Button(START_X + 3 * (BUTTON_WIDTH + BUTTON_SPACING), BUTTON_Y, "Reset"),
         'runID': Button(START_X + 4 * (BUTTON_WIDTH + BUTTON_SPACING), BUTTON_Y, "runID"),
     }
-
+    # Game loop
     while running:
         clock.tick(60)
         SCREEN.fill(WHITE)
+
+        # draw grid and UI
         draw(SCREEN, grid, ROWS, width, show_icons=True)
         for key, button in buttons.items():
             button.active = (mode == key)
@@ -88,12 +92,13 @@ def main(SCREEN, width):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-
+            # -------- Handle Button Clicks --------
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
                 for key, button in buttons.items():
                     if button.is_clicked(pos):
                         mode = key
+                        # ===== Run A* Search =====
                         if mode == 'runA*' and start and end:
                             for row in grid:
                                 for node in row:
@@ -103,6 +108,7 @@ def main(SCREEN, width):
                             last_time = exec_time
                             last_memory = memory_usage_kb
                             history_log.append((last_algo, last_time,explored_count, last_memory))
+                        # ===== Run UCS =====
                         elif mode == 'runUCS' and start and end:
                             for row in grid:
                                 for node in row:
@@ -112,6 +118,7 @@ def main(SCREEN, width):
                             last_time = exec_time
                             last_memory = memory_usage_kb
                             history_log.append((last_algo, last_time,explored_count, last_memory))
+                         # ===== Run Iterative Deepening =====
                         elif mode == 'runID' and start and end:
                             for row in grid:
                                 for node in row:
@@ -121,20 +128,24 @@ def main(SCREEN, width):
                             last_time = exec_time
                             last_memory = memory_usage_kb
                             history_log.append((last_algo, last_time,explored_count, last_memory))
+                        # ===== Learn Heuristics (Feedback) =====
                         elif mode == 'learn' and start and end:
                             for row in grid:
                                 for node in row:
                                     node.update_neighbors(grid)
                             feedback_learn_and_update(grid, start, end)
+                         # ===== Reset Grid =====
                         elif mode == 'reset':
                             start = None
                             end = None
                             grid = make_grid(ROWS, width)
+                        # ===== Show Stats =====
                         elif mode == 'stats':
                             if last_algo and last_time and last_memory is not None:
                                 show_stats_pygame(SCREEN, last_algo, last_time, history_log[-1][2], last_memory, history_log)
                                 mode = None
 
+            # Left click actions
             if pygame.mouse.get_pressed()[0]:
                 row, col = get_clicked_position(pygame.mouse.get_pos(), ROWS, width)
                 if row < ROWS and col < ROWS:
@@ -155,6 +166,7 @@ def main(SCREEN, width):
                         node.traffic_light = 'red'
                         node.has_stop_sign = False
 
+            # right click actions
             elif pygame.mouse.get_pressed()[2]:
                 row, col = get_clicked_position(pygame.mouse.get_pos(), ROWS, width)
                 if row < ROWS and col < ROWS:
