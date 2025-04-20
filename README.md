@@ -14,6 +14,14 @@
 - Give visual feedback for explored nodes
 - Real time feedback on heuristic cost
 - Displays results such as time consumption, explored, and memory usuage
+- Update heuristics for A* algorithm
+
+## Porject Structure
+ - main.py : Manages the user interface and event handling for running and comparing pathfinding algorithms with interactive grid control.
+ - algorithm.py : Implements core search algorithms (A*, UCS, Iterative Deepening) and visualization of explored paths, execution stats, and memory usage.
+ - heuristic_update.py : Contains logic for initializing and updating heuristic values based on Euclidean distance and feedback from previous pathfinding runs.
+ - visualization.py : Handles the visual rendering of the grid, node states, heuristic values, and traffic modifiers using Pygame.
+ - README.md
 
 ## Prequisites
 
@@ -45,7 +53,18 @@ pip3 install pygame
 ```
 python3 main.py
 ```
+## Controls:
+- Click on Start → click a node to set the start point
+- Click on Goal → click a node to set the goal point
+- Click on Block → click nodes to create barriers (walls)
+- Click on Stop Sign or Traffic → place traffic modifiers
+- Click Run A*, Run UCS, or Run ID to start an algorithm
+- Click Learn → run feedback-based heuristic updates
+- Click Stats → view execution time, explored nodes, and memory usage
+- Right-click a node to reset it
 
+## License
+-This project is licensed under the GNU General Public License v3.0
 
 Screenshots
 Demo
