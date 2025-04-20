@@ -1,6 +1,7 @@
 import pygame
 from algorithm import Node
 
+# Colors
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
@@ -11,6 +12,7 @@ ORANGE = (255, 165, 0)
 GRAY = (128, 128, 128)
 TURQUOISE = (48, 213, 200)
 
+# Drawing initial grid
 def draw_grid(SCREEN, rows, width):
     GAP = width // rows
     # horizontal lines
@@ -20,7 +22,7 @@ def draw_grid(SCREEN, rows, width):
         for j in range(rows):
             pygame.draw.line(SCREEN, BLACK, (j * GAP, 0), (j * GAP, width))
 
-
+# Drawing heuristics and onjects on the nodes
 def draw(SCREEN, grid, rows, width, show_icons=False):
     SCREEN.fill(WHITE)
     font = pygame.font.SysFont("segoeuiemoji", 10)
@@ -54,6 +56,7 @@ def make_grid(rows, width):
 
     return grid
 
+# Mouse click action
 def get_clicked_position(position, rows, width):
     GAP = width // rows
     y, x = position
