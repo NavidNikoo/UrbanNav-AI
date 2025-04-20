@@ -61,10 +61,12 @@ python3 main.py
 - Click Run A*, Run UCS, or Run ID to start an algorithm
 - Click Learn → run feedback-based heuristic updates
 - Click Stats → view execution time, explored nodes, and memory usage
+- Click Reset → clear grid
 - Right-click a node to reset it
 
+
 ## License
--This project is licensed under the GNU General Public License v3.0
+- This project is licensed under the GNU General Public License v3.0
 
 Screenshots
 Demo
