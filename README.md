@@ -1,5 +1,5 @@
 # Search Algorithm Visualizer
-- An AI program that demonstrates how self can find best path using different pathfinding algorithms 
+- An AI program that demonstrates how self driving cars can find best path using different pathfinding algorithms 
 
 ## Team Members
 - Biplove GC
