@@ -1,26 +1,42 @@
-# Search Algorithm Visualizer
-- An AI program that demonstrates how self driving cars can find best path using different pathfinding algorithms 
+# UrbanNav-Ai 🚗🧠  
+**AI Pathfinding Simulator for Self-Driving Cars**
 
-## Team Members
-- Biplove GC
-- Navid Nikoo
-- MinJae Kim
-- Adam Kaci
+UrbanNav-Ai is an AI visualization tool built with Python and Pygame that simulates how autonomous vehicles navigate grid-based environments using advanced search algorithms. It compares A*, Uniform Cost Search, and Iterative Deepening on 2D maps with real-time visual feedback, traffic rules, and adaptive heuristics.
 
-##  Key Features
-- Set start and end points on a grid
-- Draw walls to create obstacles.
-- Selecting different algorithm to compare the results
-- Give visual feedback for explored nodes
-- Real time feedback on heuristic cost
-- Displays results such as time consumption, explored, and memory usuage
-- Update heuristics for A* algorithm
+---
 
-## Porject Structure
- - main.py : Manages the user interface and event handling for running and comparing pathfinding algorithms with interactive grid control.
- - algorithm.py : Implements core search algorithms (A*, UCS, Iterative Deepening) and visualization of explored paths, execution stats, and memory usage.
- - heuristic_update.py : Contains logic for initializing and updating heuristic values based on Euclidean distance and feedback from previous pathfinding runs.
- - visualization.py : Handles the visual rendering of the grid, node states, heuristic values, and traffic modifiers using Pygame.
+## 🔧 Key Features
+
+- Visualizes:
+  - A* Search (with Manhattan & Euclidean heuristics)
+  - Uniform Cost Search (UCS)
+  - Iterative Deepening (IDS)
+- "Learn" mode: adapt A* heuristic based on feedback from optimal paths
+- Interactive 2D grid environment:
+  - Set start/goal positions
+  - Add walls (obstacles)
+  - Add stop signs 🚫 and traffic lights 🚦 with weighted traversal costs
+- Real-time stats: execution time, memory usage, explored nodes
+- PNG-based UI for clean macOS compatibility
+- Designed with autonomous car routing logic in mind
+
+---
+
+## 🎯 Project Goal
+
+To bring search algorithms to life — not just in theory, but in practical, visual, and interactive ways that mimic the decision-making of self-driving vehicles navigating city traffic.
+
+---
+
+## 🧱 Project Structure
+
+```plaintext
+main.py               # Main loop, UI buttons, grid event handling
+algorithm.py          # A*, UCS, IDS implementations with stats
+heuristic_update.py   # Learning mode: updates A* heuristics over time
+visualization.py      # Rendering grid states, weights, and icons
+assets/               # PNG icons for stop signs, traffic, etc.
+
  - README.md
 
 ## Prequisites
@@ -34,8 +50,8 @@ Using Python version 3.12.6
 ## Setup Instructions
 1. Clone the Repository
 ```bash
-git clone https://github.com/NavidNikoo/A-Search-Manhattan.git
-cd A-Search-Manhattan
+git clone https://github.com/NavidNikoo/UrbanNav-Ai.git
+cd UrbanNav-Ai
 ```
 
 2. Create a virtual environment
